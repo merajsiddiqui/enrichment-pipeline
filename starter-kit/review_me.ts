@@ -29,8 +29,8 @@ export async function enrichDomains(domains: string[]): Promise<Company[]> {
   console.log(`Enriching ${domains.length} domains with token ${PROVIDER_TOKEN}`);
 
   // REVIEW: When the batch mechanism is in place and api supports batch call one should utilise that to reduce
-  // Extra api calls which are not required, Which will save outbound call, request time and processing time 
-
+  // EVIEW: Extra api calls which are not required, Which will save outbound call, request time and processing time 
+  // EVIEW:  Also promise.all does not honor threshold or anything will just fire every domain instantly 
   const results = await Promise.all(
     domains.map(async (domain) => {
       while (true) {
@@ -57,11 +57,13 @@ export async function enrichDomains(domains: string[]): Promise<Company[]> {
             industry: data.industry,
           };
         } catch (e) {
+          // REVIEW: Silent data loss, You should return some error what happend rather than null 
           return null;
         }
       }
     })
   );
 
+  // REVIEW: Filtering will silently skip domains which did not return data 
   return results.filter(Boolean) as Company[];
 }
